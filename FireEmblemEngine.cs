@@ -179,6 +179,7 @@ public class FireEmblemEngine : MonoBehaviour {
         SpawnUnit(UnitController.Jobs.Warrior, tileGrid[1, 6]);
         SpawnUnit(UnitController.Jobs.Mage, tileGrid[5, 5]);
         SpawnUnit(UnitController.Jobs.Warrior, tileGrid[5, 5]);
+        SpawnUnit(UnitController.Jobs.Warrior, tileGrid[5, 5]);
     }
 
     public GameObject warriorPrefab, magePrefab;
@@ -215,7 +216,7 @@ public class FireEmblemEngine : MonoBehaviour {
         mapHUDController.UpdateCursorInfoHUD(tileGrid[(int)cursorPosition.x, (int)cursorPosition.z]);
     }
 
-    public enum MapHUDMessages { Move = 0, Attack = 1, SelectTile = 2 };
+    public enum MapHUDMessages { None = -1, Move = 0, Attack = 1, SelectTile = 2 };
     public void ProcessHUDMessage(int msg) {
         mapHUDController.ProcessHUDMessagesByState((MapHUDMessages) msg);
     }

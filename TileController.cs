@@ -53,6 +53,20 @@ namespace Fire_Emblem_Engine
                         units[1].transform.localPosition = new Vector3(x * width / 4, 0, z * height / 4);
                     }
                     break;
+                case 3:
+                    {
+                        float z = -0.5f, x = -0.5f;
+                        units[0].transform.localPosition = new Vector3(x * width / 4, 0, z * height / 4);
+
+                        z = 0.5f;
+                        x = -0.5f;
+                        units[1].transform.localPosition = new Vector3(x * width / 4, 0, z * height / 4);
+
+                        z = 0f;
+                        x = 0.5f;
+                        units[2].transform.localPosition = new Vector3(x * width / 4, 0, z * height / 4);
+                    }
+                    break;
                 case 9:
                     {
                         for(int i = 0; i < units.Count; i++)

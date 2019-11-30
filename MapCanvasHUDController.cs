@@ -13,10 +13,11 @@ namespace Fire_Emblem_Engine
         }
 
         //prefabs
-        public Transform actionButton;
+        public GameObject actionButtonPrefab;
 
         public Text unitCountlabel, unitJobsLabel;
         public Transform actionsMenu;
+        public RectTransform actionsMenuBG;
         void SetActionsMenu(bool state)
         {
             actionsMenu.gameObject.SetActive(state);
@@ -68,13 +69,15 @@ namespace Fire_Emblem_Engine
                     {
                         if(lastProcessedTile.units.Count > 0)
                         {
-                            Debug.Log(cursorColorChoosingActions);
                             paintCursor(cursorColorChoosingActions);
                             mayMoveCursor = false;
 
                             SetActionsMenuByTile(lastProcessedTile);
 
                             currentHUDState = newHUDState;
+
+                            Actions[] defaultActions = { Actions.Move, Actions.Attack };
+                            setActionButtons(defaultActions);
                         }
                     }
                     break;
@@ -111,6 +114,48 @@ namespace Fire_Emblem_Engine
                     paintTileRecursively(tile.neighbourTileLeft, distanceFromCenter + 1, maxDistanceFromCenter, color);
                 if (tile.hasTileRight)
                     paintTileRecursively(tile.neighbourTileRight, distanceFromCenter + 1, maxDistanceFromCenter, color);
+            }
+        }
+
+        List<ActionButton> actionBtns = new List<ActionButton>();
+        void cleanActionsBtn()
+        {
+            actionBtns.Clear();
+        }
+        public enum Actions { Move, Attack };
+        void setActionButtons(Actions[] actions)
+        {
+            cleanActionsBtn();
+            actionsMenuBG.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 164 * actions.Length);
+            for (int i = 0; i < actions.Length; i++)
+            {
+                Debug.Log(actions[i].ToString());
+                ActionButton newActionBtn = createActionButton(actions[i].ToString(), getMessageByAction(actions[i]), i);
+                actionBtns.Add(newActionBtn);
+            }
+        }
+        ActionButton createActionButton(string label, FireEmblemEngine.MapHUDMessages msg, int btnIndex)
+        {
+            GameObject actBtnObj = GameObject.Instantiate(actionButtonPrefab, Vector3.zero, Quaternion.identity, actionsMenu);
+            ActionButton actBtn = actBtnObj.GetComponent<ActionButton>();
+            actBtn.btn.onClick.AddListener(() => ProcessHUDMessagesByState(msg));
+            actBtn.text.text = label;
+            actBtn.rect.localPosition = new Vector3(btnIndex * 167 + 5, 5, 0);
+            return actBtn;
+        }
+        FireEmblemEngine.MapHUDMessages getMessageByAction(Actions action)
+        {
+            switch (action)
+            {
+                case Actions.Move:
+                    {
+                        return FireEmblemEngine.MapHUDMessages.Move;
+                    }
+                case Actions.Attack:
+                    {
+                        return FireEmblemEngine.MapHUDMessages.Attack;
+                    }
+                default: return FireEmblemEngine.MapHUDMessages.None;
             }
         }
 
