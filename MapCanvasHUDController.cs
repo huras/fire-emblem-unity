@@ -21,6 +21,8 @@ namespace Fire_Emblem_Engine
             }
         }
 
+        public enum HUDState { Navigating, ChosingUnitsMovement, MovingUnit, ChosingWhoToAttack, ChosingAttackStrategies };
+        public HUDState currentHUDState = HUDState.Navigating;
         TileController lastProcessedTile = null;
         public void UpdateCursorInfoHUD(TileController tile)
         {
