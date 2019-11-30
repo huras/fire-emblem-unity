@@ -8,6 +8,7 @@ namespace Fire_Emblem_Engine
     public class TileController : MonoBehaviour
     {
         public MeshRenderer textureRenderer;
+        public MeshRenderer tintTileRenderer;
         public Transform unitsParent;
 
         public TileController neighbourTileUp = null, neighbourTileDown = null, neighbourTileLeft = null, neighbourTileRight = null;
