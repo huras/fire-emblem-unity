@@ -39,8 +39,7 @@ namespace Fire_Emblem_Engine
             #endregion
         }
         public MeshRenderer[] cursorBars;
-        public Color cursorColorsEmptyField;
-        public Color cursorColorsUnit;
+        public Color cursorColorsEmptyField, cursorEligibleTile, cursorColorChoosingActions , cursorColorNotEligibleTile;
         void paintCursor(Color color)
         {
             for (int i = 0; i < cursorBars.Length; i++)
@@ -57,9 +56,11 @@ namespace Fire_Emblem_Engine
             switch (newHUDState)
             {
                 case HUDState.Navigating:
-                    {
-                        mayMoveCursor = true;
+                    {                        
                         SetActionsMenu(false);
+                        
+                        mayMoveCursor = true;
+
                         currentHUDState = newHUDState;
                     }
                     break;
@@ -67,8 +68,12 @@ namespace Fire_Emblem_Engine
                     {
                         if(lastProcessedTile.units.Count > 0)
                         {
+                            Debug.Log(cursorColorChoosingActions);
+                            paintCursor(cursorColorChoosingActions);
                             mayMoveCursor = false;
+
                             SetActionsMenuByTile(lastProcessedTile);
+
                             currentHUDState = newHUDState;
                         }
                     }
@@ -166,34 +171,19 @@ namespace Fire_Emblem_Engine
         TileController lastProcessedTile = null;
         public void UpdateCursorInfoHUD(TileController tile)
         {
-            #region Defines cursor
-            if (tile.units.Count == 0)
-            {
-                paintCursor(cursorColorsEmptyField);
-            }
-            else if (tile.units.Count == 1)
-            {
-                paintCursor(cursorColorsUnit);
-            }
-            else if (tile.units.Count > 1)
-            {
-                paintCursor(cursorColorsUnit);
-            }
-            #endregion
             #region Defines label
             if (tile.units.Count == 0)
             {
                 unitylabel.text = "No units here";
-                paintCursor(cursorColorsEmptyField);
+                
             }
             else if (tile.units.Count == 1)
             {
                 unitylabel.text = tile.units[0].job.ToString();
-                paintCursor(cursorColorsUnit);
+                
             }
             else if (tile.units.Count > 1)
             {
-                paintCursor(cursorColorsUnit);
                 unitylabel.text = tile.units.Count.ToString();
                 List<UnitController.Jobs> jobsGroup = new List<UnitController.Jobs>();
                 List<int> groupsCount = new List<int>();
@@ -221,6 +211,35 @@ namespace Fire_Emblem_Engine
                 unitylabel.text += " (" + jobsDetails + ") ";
             }
             #endregion
+
+            #region Defines cursor color
+            if (lastProcessedTile)
+            {
+                if (currentHUDState == HUDState.Navigating)
+                {
+                    if (lastProcessedTile.units.Count == 0)
+                    {
+                        paintCursor(cursorColorsEmptyField);
+                    }
+                    else if (lastProcessedTile.units.Count >= 1)
+                    {
+                        paintCursor(cursorEligibleTile);
+                    }
+                }
+                else if (currentHUDState == HUDState.ChosingUnitsMovement)
+                {
+                    if (lastProcessedTile.units.Count == 0)
+                    {
+                        paintCursor(cursorEligibleTile);
+                    }
+                    else if (lastProcessedTile.units.Count >= 1)
+                    {
+                        paintCursor(cursorColorNotEligibleTile);
+                    }
+                }
+            }
+            #endregion
+
             lastProcessedTile = tile;
         }
         public void ProcessHUDMessagesByState(FireEmblemEngine.MapHUDMessages msg)
