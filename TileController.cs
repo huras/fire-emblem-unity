@@ -7,11 +7,10 @@ namespace Fire_Emblem_Engine
 {
     public class TileController : MonoBehaviour
     {
-        public MeshRenderer renderer;
+        public MeshRenderer textureRenderer;
         public Transform unitsParent;
 
         public TileController neighbourTileUp = null, neighbourTileDown = null, neighbourTileLeft = null, neighbourTileRight = null;
-        bool hasTileUp = false, hasTileDown = false, hasTileLeft = false, hasTileRight = false;
 
         public List<UnitController> units = new List<UnitController>();
         float width = 1, height = 1;

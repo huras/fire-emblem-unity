@@ -140,7 +140,7 @@ public class FireEmblemEngine : MonoBehaviour {
             for (int y = 0; y < height; y++)
             {
                 TileController newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, 0, y + ((x % 2 == 0) ? 0 : 0.5f)), Quaternion.identity).GetComponent<TileController>();
-                newTile.renderer.material = grassMaterial;
+                newTile.textureRenderer.material = grassMaterial;
                 tileGrid[x, y] = newTile;
             }
         }
