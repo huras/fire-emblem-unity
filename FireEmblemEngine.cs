@@ -178,6 +178,7 @@ public class FireEmblemEngine : MonoBehaviour {
         SpawnUnit(UnitController.Jobs.Mage, tileGrid[3, 2]);
         SpawnUnit(UnitController.Jobs.Warrior, tileGrid[1, 6]);
         SpawnUnit(UnitController.Jobs.Mage, tileGrid[5, 5]);
+        SpawnUnit(UnitController.Jobs.Warrior, tileGrid[5, 5]);
     }
 
     public GameObject warriorPrefab, magePrefab;
