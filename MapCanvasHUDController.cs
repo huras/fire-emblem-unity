@@ -60,12 +60,17 @@ namespace Fire_Emblem_Engine
                     {
                         mayMoveCursor = true;
                         SetActionsMenu(false);
+                        currentHUDState = newHUDState;
                     }
                     break;
                 case HUDState.ChosingUnitAction:
                     {
-                        mayMoveCursor = false;
-                        SetActionsMenuByTile(lastProcessedTile);
+                        if(lastProcessedTile.units.Count > 0)
+                        {
+                            mayMoveCursor = false;
+                            SetActionsMenuByTile(lastProcessedTile);
+                            currentHUDState = newHUDState;
+                        }
                     }
                     break;
                 case HUDState.ChosingUnitsMovement:
@@ -73,11 +78,10 @@ namespace Fire_Emblem_Engine
                         mayMoveCursor = true;
                         SetActionsMenu(lastProcessedTile);
                         paintMovimentationGrid(lastProcessedTile, new Color(9 / 255f, 0, 1, 58 / 255f));
+                        currentHUDState = newHUDState;
                     }
                     break;
             }
-
-            currentHUDState = newHUDState;
         }
         void paintMovimentationGrid(TileController tile, Color color)
         {
