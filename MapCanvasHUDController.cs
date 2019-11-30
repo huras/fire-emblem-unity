@@ -21,6 +21,7 @@ namespace Fire_Emblem_Engine
             }
         }
 
+        TileController lastProcessedTile = null;
         public void UpdateCursorInfoHUD(TileController tile)
         {
             #region Defines cursor
@@ -90,8 +91,9 @@ namespace Fire_Emblem_Engine
             else if (tile.units.Count > 1)
             {
                 actionsMenu.gameObject.SetActive(true);
-            } 
+            }
             #endregion
+            lastProcessedTile = tile;
         }
         public void ProcessHUDMessages(FireEmblemEngine.MapHUDMessages msg)
         {
