@@ -134,6 +134,7 @@ public class FireEmblemEngine : MonoBehaviour {
     {
         tileGrid = new TileController[width, height];
 
+        //build grid
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -141,6 +142,41 @@ public class FireEmblemEngine : MonoBehaviour {
                 TileController newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, 0, y + ((x % 2 == 0) ? 0 : 0.5f)), Quaternion.identity).GetComponent<TileController>();
                 newTile.renderer.material = grassMaterial;
                 tileGrid[x, y] = newTile;
+            }
+        }
+
+        //assign neighbours
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                TileController item = tileGrid[x, y];
+                if(y > 0)
+                {
+                    item.neighbourTileUp = tileGrid[x, y - 1];
+                } else if (y < height - 1)
+                {
+                    item.neighbourTileDown = tileGrid[x, y + 1];
+                }
+
+                if (x > 0)
+                {
+                    item.neighbourTileLeft = tileGrid[x - 1, y ];
+                }
+                else if (x < width - 1)
+                {
+                    item.neighbourTileRight = tileGrid[x + 1, y];
+                }
+            }
+        }
+
+        //init tiles
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                TileController item = tileGrid[x, y];
+                item.InitialiseTile();
             }
         }
     }

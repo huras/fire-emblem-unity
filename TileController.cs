@@ -10,6 +10,9 @@ namespace Fire_Emblem_Engine
         public MeshRenderer renderer;
         public Transform unitsParent;
 
+        public TileController neighbourTileUp = null, neighbourTileDown = null, neighbourTileLeft = null, neighbourTileRight = null;
+        bool hasTileUp = false, hasTileDown = false, hasTileLeft = false, hasTileRight = false;
+
         public List<UnitController> units = new List<UnitController>();
         float width = 1, height = 1;
 
@@ -97,6 +100,14 @@ namespace Fire_Emblem_Engine
                     }
                     break;
             }
+        }
+
+        public void InitialiseTile()
+        {
+            hasTileUp = neighbourTileUp != null;
+            hasTileDown = neighbourTileDown != null;
+            hasTileLeft = neighbourTileLeft != null;
+            hasTileRight = neighbourTileRight != null;
         }
     }
 }
