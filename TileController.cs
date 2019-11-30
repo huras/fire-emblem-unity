@@ -12,6 +12,7 @@ namespace Fire_Emblem_Engine
         public Transform unitsParent;
 
         public TileController neighbourTileUp = null, neighbourTileDown = null, neighbourTileLeft = null, neighbourTileRight = null;
+        public bool hasTileUp = false, hasTileDown = false, hasTileLeft = false, hasTileRight = false;
 
         public List<UnitController> units = new List<UnitController>();
         float width = 1, height = 1;
