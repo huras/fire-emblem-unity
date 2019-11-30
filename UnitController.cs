@@ -9,6 +9,7 @@ namespace Fire_Emblem_Engine
         public enum Jobs { None, Warrior, Mage };
         public Jobs job = Jobs.None;
         public Animator an;
+        public int moveRadius = 3;
 
         // Use this for initialization
         void Start()
