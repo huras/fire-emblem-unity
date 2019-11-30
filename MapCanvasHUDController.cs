@@ -15,7 +15,7 @@ namespace Fire_Emblem_Engine
         //prefabs
         public Transform actionButton;
 
-        public Text unitylabel;
+        public Text unitCountlabel, unitJobsLabel;
         public Transform actionsMenu;
         void SetActionsMenu(bool state)
         {
@@ -174,17 +174,18 @@ namespace Fire_Emblem_Engine
             #region Defines label
             if (tile.units.Count == 0)
             {
-                unitylabel.text = "No units here";
-                
+                unitCountlabel.text = "0";
+                unitJobsLabel.text = "";
             }
             else if (tile.units.Count == 1)
             {
-                unitylabel.text = tile.units[0].job.ToString();
+                unitCountlabel.text = tile.units.Count.ToString();
+                unitJobsLabel.text = tile.units[0].job.ToString();
                 
             }
             else if (tile.units.Count > 1)
             {
-                unitylabel.text = tile.units.Count.ToString();
+                unitCountlabel.text = tile.units.Count.ToString();
                 List<UnitController.Jobs> jobsGroup = new List<UnitController.Jobs>();
                 List<int> groupsCount = new List<int>();
 
@@ -206,9 +207,14 @@ namespace Fire_Emblem_Engine
                 for (int i = 0; i < jobsGroup.Count; i++)
                 {
                     UnitController.Jobs item = jobsGroup[i];
-                    jobsDetails += " " + groupsCount[i].ToString() + " " + item.ToString() + " ";
+                    jobsDetails += " " + groupsCount[i].ToString() + " " + item.ToString();
+                    if(groupsCount[i] > 1)
+                    {
+                        jobsDetails += "s";
+                    }
+                    jobsDetails += " ";
                 }
-                unitylabel.text += " (" + jobsDetails + ") ";
+                unitJobsLabel.text = " (" + jobsDetails + ") ";
             }
             #endregion
 
