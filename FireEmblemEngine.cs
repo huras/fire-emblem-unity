@@ -93,26 +93,8 @@ public class FireEmblemEngine : MonoBehaviour {
         {
             movimentation += Vector3.right;
         }
-
-        Vector3 oldcursorPosition = cursorPosition;
-        cursorPosition += movimentation;
-        if(cursorPosition.x >= mapHeight)
-        {
-            cursorPosition.x = mapHeight - 1;
-        }
-        if (cursorPosition.x < 0)
-        {
-            cursorPosition.x = 0;
-        }
-
-        if (cursorPosition.z >= mapWidth)
-        {
-            cursorPosition.z = mapWidth - 1;
-        }
-        if (cursorPosition.z < 0)
-        {
-            cursorPosition.z = 0;
-        }
+        
+        cursorPosition = mapHUDController.MoveCursor(movimentation, mapHeight, mapWidth);
 
         if ((cursorPosition.x) % 2 == 1)
         {
@@ -122,6 +104,12 @@ public class FireEmblemEngine : MonoBehaviour {
         {
             mapCursor.transform.position = Vector3.Lerp(mapCursor.transform.position, cursorPosition, 6.6f * Time.deltaTime);
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            mapHUDController.ProcessHUDMessagesByState(MapHUDMessages.SelectTile);
+        }
+
         UpdateCursorHUD();
     }
 
@@ -154,7 +142,7 @@ public class FireEmblemEngine : MonoBehaviour {
                 if(y > 0)
                 {
                     item.neighbourTileUp = tileGrid[x, y - 1];
-                } else if (y < height - 1)
+                } if (y < height - 1)
                 {
                     item.neighbourTileDown = tileGrid[x, y + 1];
                 }
@@ -163,7 +151,7 @@ public class FireEmblemEngine : MonoBehaviour {
                 {
                     item.neighbourTileLeft = tileGrid[x - 1, y ];
                 }
-                else if (x < width - 1)
+                if (x < width - 1)
                 {
                     item.neighbourTileRight = tileGrid[x + 1, y];
                 }
@@ -226,8 +214,8 @@ public class FireEmblemEngine : MonoBehaviour {
         mapHUDController.UpdateCursorInfoHUD(tileGrid[(int)cursorPosition.x, (int)cursorPosition.z]);
     }
 
-    public enum MapHUDMessages { Move = 0, Attack = 1 };
+    public enum MapHUDMessages { Move = 0, Attack = 1, SelectTile = 2 };
     public void ProcessHUDMessage(int msg) {
-
+        mapHUDController.ProcessHUDMessagesByState((MapHUDMessages) msg);
     }
 }

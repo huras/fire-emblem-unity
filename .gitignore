@@ -34,3 +34,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# Mine
+*.mat
+*.meta
+*.prefab
+*.unity
