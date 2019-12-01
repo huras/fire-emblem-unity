@@ -16,6 +16,7 @@ namespace Fire_Emblem_Engine
 
         public List<UnitController> units = new List<UnitController>();
         float width = 1, height = 1;
+        public int x, y;
 
         public void PlaceUnit(UnitController unit)
         {            

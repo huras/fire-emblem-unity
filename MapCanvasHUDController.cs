@@ -9,7 +9,7 @@ namespace Fire_Emblem_Engine
     {
         public void Start()
         {
-            ChangeHUDState(HUDState.Navigating);
+            SetHUDState(HUDState.Navigating);
         }
 
         //prefabs
@@ -52,8 +52,9 @@ namespace Fire_Emblem_Engine
 
         public enum HUDState { Navigating, ChosingUnitAction ,ChosingUnitsMovement, MovingUnit, ChosingWhoToAttack, ChosingAttackStrategies };
         public HUDState currentHUDState = HUDState.Navigating;
-        public void ChangeHUDState(HUDState newHUDState)
+        public void SetHUDState(HUDState newHUDState)
         {
+            bool mayChangeState = false;
             switch (newHUDState)
             {
                 case HUDState.Navigating:
@@ -62,43 +63,80 @@ namespace Fire_Emblem_Engine
                         
                         mayMoveCursor = true;
 
-                        currentHUDState = newHUDState;
+                        mayChangeState = true;
                     }
                     break;
                 case HUDState.ChosingUnitAction:
                     {
-                        if(lastProcessedTile.units.Count > 0)
+                        if (lastProcessedTile.units.Count > 0)
                         {
+                            tileForActions = lastProcessedTile;
                             paintCursor(cursorColorChoosingActions);
+                            paintTileRecursively(tileForActions, 0, 0, new Color(90 / 255f, 90 / 255f, 90 / 255f, 48 / 255f));
                             mayMoveCursor = false;
+                            Debug.Log(Time.deltaTime);
 
                             SetActionsMenuByTile(lastProcessedTile);
 
-                            currentHUDState = newHUDState;
+                            mayChangeState = true;
 
-                            Actions[] defaultActions = { Actions.Move, Actions.Attack };
+                            Actions[] defaultActions = { Actions.Move, Actions.Attack, Actions.Cancel };
                             setActionButtons(defaultActions);
                         }
                     }
                     break;
                 case HUDState.ChosingUnitsMovement:
                     {
+                        UnitController slowerUnitInTile = findSlowestUnitInTile(lastProcessedTile);
+                        if (slowerUnitInTile != null)
+                        {
+                            int radius = slowerUnitInTile.moveRadius;
+                            paintMovimentationGrid(lastProcessedTile, new Color(9 / 255f, 0, 1, 58 / 255f), radius);
+                            paintTileRecursively(tileForActions, 0, 0, new Color(90 / 255f, 90 / 255f, 90 / 255f, 48 / 255f));
+                            ConfineCursorToRadius(lastProcessedTile, radius);
+                        }
+
+                        Actions[] defaultActions = { Actions.Walk, Actions.Cancel };
+                        setActionButtons(defaultActions);
+
                         mayMoveCursor = true;
                         SetActionsMenu(lastProcessedTile);
-                        paintMovimentationGrid(lastProcessedTile, new Color(9 / 255f, 0, 1, 58 / 255f));
-                        currentHUDState = newHUDState;
+                        mayChangeState = true;
+                    }
+                    break;
+            }
+
+            if (mayChangeState)
+            {
+                LeaveHUDState();
+                currentHUDState = newHUDState;
+            }
+        }
+        public void LeaveHUDState()
+        {
+            switch (currentHUDState)
+            {
+                case HUDState.ChosingUnitAction:
+                    {
+                        //tileForActions = null;
+                    }
+                    break;
+                case HUDState.ChosingUnitsMovement:
+                    {
+                        Unconfine();
+                        UnitController slowerUnitInTile = findSlowestUnitInTile(tileForActions);
+                        if (slowerUnitInTile != null)
+                        {
+                            int radius = slowerUnitInTile.moveRadius;
+                            paintMovimentationGrid(tileForActions, new Color(0,0,0,0), radius);
+                        }
                     }
                     break;
             }
         }
-        void paintMovimentationGrid(TileController tile, Color color)
+        void paintMovimentationGrid(TileController tile, Color color, int radius)
         {
-            UnitController slowerUnitInTile = findSlowestUnitInTile(tile);
-            if (slowerUnitInTile != null)
-            {
-                int radius = slowerUnitInTile.moveRadius;
-                paintTileRecursively(tile, 0, radius, color);
-            }
+            paintTileRecursively(tile, 0, radius, color);
         }
         void paintTileRecursively(TileController tile, int distanceFromCenter, int maxDistanceFromCenter, Color color)
         {
@@ -120,16 +158,19 @@ namespace Fire_Emblem_Engine
         List<ActionButton> actionBtns = new List<ActionButton>();
         void cleanActionsBtn()
         {
+            for(int i = 0; i < actionBtns.Count; i++)
+            {
+                GameObject.Destroy(actionBtns[i].gameObject);
+            }
             actionBtns.Clear();
         }
-        public enum Actions { Move, Attack };
+        public enum Actions { Move, Attack, Walk, Cancel };
         void setActionButtons(Actions[] actions)
         {
             cleanActionsBtn();
             actionsMenuBG.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 164 * actions.Length);
             for (int i = 0; i < actions.Length; i++)
             {
-                Debug.Log(actions[i].ToString());
                 ActionButton newActionBtn = createActionButton(actions[i].ToString(), getMessageByAction(actions[i]), i);
                 actionBtns.Add(newActionBtn);
             }
@@ -155,34 +196,67 @@ namespace Fire_Emblem_Engine
                     {
                         return FireEmblemEngine.MapHUDMessages.Attack;
                     }
+                case Actions.Cancel:
+                    {
+                        return FireEmblemEngine.MapHUDMessages.Cancel;
+                    }
+                case Actions.Walk:
+                    {
+                        return FireEmblemEngine.MapHUDMessages.SelectTile;
+                    }
                 default: return FireEmblemEngine.MapHUDMessages.None;
             }
         }
 
         public Vector3 cursorPosition = Vector3.zero;
         bool mayMoveCursor = false;
-        public Vector3 MoveCursor(Vector3 movimentation, int mapHeight, int mapWidth)
+
+        public void SetCursor(Vector3 newPosition)
+        {
+            MoveCursor(newPosition - cursorPosition);
+        }
+        int mapHeight, mapWidth;
+        TileController[,] tileMap;
+        public void SetMapInfo(int mapHeight,  int mapWidth, TileController[,] tileMap)
+        {
+            this.mapHeight = mapHeight;
+            this.mapWidth = mapWidth;
+            this.tileMap = tileMap;
+        }
+        public Vector3 MoveCursor(Vector3 movimentation)
         {            
             if(mayMoveCursor)
             {
-                cursorPosition += movimentation;
-                if (cursorPosition.x >= mapHeight)
+                Vector3 cursorNewPosition = cursorPosition + movimentation;
+                if (cursorNewPosition.x >= mapHeight)
                 {
-                    cursorPosition.x = mapHeight - 1;
+                    cursorNewPosition.x = mapHeight - 1;
                 }
-                if (cursorPosition.x < 0)
+                if (cursorNewPosition.x < 0)
                 {
-                    cursorPosition.x = 0;
+                    cursorNewPosition.x = 0;
                 }
 
-                if (cursorPosition.z >= mapWidth)
+                if (cursorNewPosition.z >= mapWidth)
                 {
-                    cursorPosition.z = mapWidth - 1;
+                    cursorNewPosition.z = mapWidth - 1;
                 }
-                if (cursorPosition.z < 0)
+                if (cursorNewPosition.z < 0)
                 {
-                    cursorPosition.z = 0;
+                    cursorNewPosition.z = 0;
                 }
+
+                bool mayChangePosition = true;
+                if (isConfined)
+                {
+                    if (!confinementArea.Contains(tileMap[(int)cursorNewPosition.x, (int)cursorNewPosition.z]))
+                    {
+                        mayChangePosition = false;
+                    }
+                }
+
+                if(mayChangePosition)
+                cursorPosition = cursorNewPosition;
             }
 
             return cursorPosition;
@@ -212,8 +286,39 @@ namespace Fire_Emblem_Engine
                 return tile.units[slowestUnitIndex];
             }
         }
+        public bool isConfined = false;
+        List<TileController> confinementArea = new List<TileController>();
+        void ConfineCursorToRadius(TileController center, int radius)
+        {
+            isConfined = true;
+            RecursiveConfineTiles(center, radius, 0);
+        }
+        void RecursiveConfineTiles(TileController currentTile, int maxRadius, int currentRadius)
+        {
+            if (!confinementArea.Contains(currentTile))
+                confinementArea.Add(currentTile);
 
-        TileController lastProcessedTile = null;
+            if(currentRadius + 1 <= maxRadius)
+            {
+                if (currentTile.hasTileUp)
+                    RecursiveConfineTiles(currentTile.neighbourTileUp, maxRadius, currentRadius + 1);
+                if (currentTile.hasTileDown)
+                    RecursiveConfineTiles(currentTile.neighbourTileDown, maxRadius, currentRadius + 1);
+                if (currentTile.hasTileLeft)
+                    RecursiveConfineTiles(currentTile.neighbourTileLeft, maxRadius, currentRadius + 1);
+                if (currentTile.hasTileRight)
+                    RecursiveConfineTiles(currentTile.neighbourTileRight, maxRadius, currentRadius + 1);
+            }
+        }
+        void Unconfine()
+        {
+            isConfined = false;
+            confinementArea.Clear();
+        }
+
+        //HUD Messages
+        public TileController lastProcessedTile = null;
+        public TileController tileForActions = null;
         public void UpdateCursorInfoHUD(TileController tile)
         {
             #region Defines label
@@ -303,7 +408,7 @@ namespace Fire_Emblem_Engine
                         {
                             case FireEmblemEngine.MapHUDMessages.SelectTile:
                                 {
-                                    ChangeHUDState(HUDState.ChosingUnitAction);
+                                    SetHUDState(HUDState.ChosingUnitAction);
                                 }
                                 break;
                         }
@@ -315,10 +420,34 @@ namespace Fire_Emblem_Engine
                         {
                             case FireEmblemEngine.MapHUDMessages.Move:
                                 {
-                                    ChangeHUDState(HUDState.ChosingUnitsMovement);
+                                    SetHUDState(HUDState.ChosingUnitsMovement);
                                 }
                                 break;
                             case FireEmblemEngine.MapHUDMessages.Attack:
+                                {
+
+                                }
+                                break;
+                            case FireEmblemEngine.MapHUDMessages.Cancel:
+                                {
+                                    SetHUDState(HUDState.Navigating);
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case HUDState.ChosingUnitsMovement:
+                    {
+                        switch (msg)
+                        {
+                            case FireEmblemEngine.MapHUDMessages.Cancel:
+                                {
+                                    lastProcessedTile = tileForActions;
+                                    SetCursor(new Vector3(tileForActions.x, 0, tileForActions.y));
+                                    SetHUDState(HUDState.ChosingUnitAction);
+                                }
+                                break;
+                            case FireEmblemEngine.MapHUDMessages.SelectTile:
                                 {
 
                                 }
@@ -328,6 +457,5 @@ namespace Fire_Emblem_Engine
                     break;
             }
         }
-
     }
 }

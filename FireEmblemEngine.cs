@@ -9,6 +9,7 @@ public class FireEmblemEngine : MonoBehaviour {
     public int mapHeight, mapWidth;
 	void Awake () {
         BuildStartingGrid(mapHeight, mapWidth);
+        mapHUDController.SetMapInfo(mapHeight, mapWidth, tileGrid);
         cursorPosition = new Vector3(mapHeight / 2, 0, mapWidth / 2);
         DoTesting();
     }
@@ -94,7 +95,7 @@ public class FireEmblemEngine : MonoBehaviour {
             movimentation += Vector3.right;
         }
         
-        cursorPosition = mapHUDController.MoveCursor(movimentation, mapHeight, mapWidth);
+        cursorPosition = mapHUDController.MoveCursor(movimentation);
 
         if ((cursorPosition.x) % 2 == 1)
         {
@@ -130,6 +131,8 @@ public class FireEmblemEngine : MonoBehaviour {
                 TileController newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, 0, y + ((x % 2 == 0) ? 0 : 0.5f)), Quaternion.identity).GetComponent<TileController>();
                 newTile.textureRenderer.material = grassMaterial;
                 tileGrid[x, y] = newTile;
+                newTile.x = x;
+                newTile.y = y;
             }
         }
 
@@ -216,7 +219,7 @@ public class FireEmblemEngine : MonoBehaviour {
         mapHUDController.UpdateCursorInfoHUD(tileGrid[(int)cursorPosition.x, (int)cursorPosition.z]);
     }
 
-    public enum MapHUDMessages { None = -1, Move = 0, Attack = 1, SelectTile = 2 };
+    public enum MapHUDMessages { None = -1, Move = 0, Attack = 1, SelectTile = 2, Cancel = 3 };
     public void ProcessHUDMessage(int msg) {
         mapHUDController.ProcessHUDMessagesByState((MapHUDMessages) msg);
     }
