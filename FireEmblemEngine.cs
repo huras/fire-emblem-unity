@@ -34,7 +34,7 @@ public class FireEmblemEngine : MonoBehaviour {
         Vector3 movimentation = Vector3.zero;
         if (Input.GetKeyDown(KeyCode.Keypad3))
         {
-            if (!onOddTile)
+            if (!onOddTile && tileOffset > 0)
             {
                 movimentation += Vector3.right;
             }
@@ -45,7 +45,7 @@ public class FireEmblemEngine : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.Keypad1))
         {
-            if (onOddTile)
+            if (onOddTile && tileOffset > 0)
             {
                 movimentation += Vector3.right;
             }
@@ -56,7 +56,7 @@ public class FireEmblemEngine : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.Keypad9))
         {
-            if (!onOddTile)
+            if (onOddTile && tileOffset > 0)
             {
                 movimentation += Vector3.left;
             }
@@ -67,7 +67,7 @@ public class FireEmblemEngine : MonoBehaviour {
         }
         else if (Input.GetKeyDown(KeyCode.Keypad7))
         {
-            if (onOddTile)
+            if (onOddTile && tileOffset > 0)
             {
                 movimentation += Vector3.left;
             }
@@ -99,7 +99,7 @@ public class FireEmblemEngine : MonoBehaviour {
 
         if ((cursorPosition.x) % 2 == 1)
         {
-            mapCursor.transform.position = Vector3.Lerp(mapCursor.transform.position, cursorPosition + new Vector3(0, 0, 0.5f), 5.6f * Time.deltaTime);
+            mapCursor.transform.position = Vector3.Lerp(mapCursor.transform.position, cursorPosition + new Vector3(0, 0, tileOffset), 5.6f * Time.deltaTime);
         }
         else
         {
@@ -119,6 +119,7 @@ public class FireEmblemEngine : MonoBehaviour {
     public TileController[,] tileGrid;
 
     public Material grassMaterial;
+    float tileOffset = 0.0f;
     void BuildStartingGrid(int width, int height)
     {
         tileGrid = new TileController[width, height];
@@ -128,7 +129,7 @@ public class FireEmblemEngine : MonoBehaviour {
         {
             for (int y = 0; y < height; y++)
             {
-                TileController newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, 0, y + ((x % 2 == 0) ? 0 : 0.5f)), Quaternion.identity).GetComponent<TileController>();
+                TileController newTile = GameObject.Instantiate(tilePrefab, new Vector3(x, 0, y + ((x % 2 == 0) ? 0 : tileOffset)), Quaternion.identity).GetComponent<TileController>();
                 newTile.textureRenderer.material = grassMaterial;
                 tileGrid[x, y] = newTile;
                 newTile.x = x;
